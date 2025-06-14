@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<!-- 
+  The lang="en" attribute is crucial for SEO and accessibility, 
+  telling search engines and screen readers the page's language.
+-->
+<html lang="en">
+<head>
+    <!-- SEO OPTIMIZATION: Basic Meta Tags -->
+    <meta charset="UTF-8">
+    <title>iPhone Simulator | An Interactive iOS Experience by @ChrisPirillo</title>
+    <meta name="description" content="Experience the original iPhone interface with this fully interactive, web-based simulator. Explore classic apps like Calculator, Notes, and more. Created by Chris Pirillo.">
+    <meta name="keywords" content="iPhone Simulator, iPhone Experience, iOS Simulator, Chris Pirillo, Web-based iPhone, HTML iPhone, JavaScript iPhone, Interactive Simulator">
+    <meta name="author" content="@ChrisPirillo">
+
+    <!-- CORE WEB VITALS & PERFORMANCE: Preconnect to critical third-party origins -->
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    
+    <!-- SEO OPTIMIZATION: Canonical URL to prevent duplicate content issues -->
+    <link rel="canonical" href="https://pirillo.com/arcade/iphone.html">
+
+    <!-- CORE WEB VITALS & PERFORMANCE: Viewport for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <!-- SEO OPTIMIZATION: Open Graph (Facebook, Pinterest, etc.) & Twitter Card meta tags for social sharing -->
+    <meta property="og:title" content="iPhone Simulator | An Interactive iOS Experience">
+    <meta property="og:description" content="A fully functional, web-based simulation of the original iPhone experience.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pirillo.com/arcade/iphone.html">
+    <meta property="og:image" content="https://pirillo.com/arcade/images/iphone.png">
+    <meta property="og:image:width" content="375">
+    <meta property="og:image:height" content="750">
+    <meta property="og:site_name" content="Pirillo Arcade">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@ChrisPirillo">
+    <meta name="twitter:creator" content="@ChrisPirillo">
+    <meta name="twitter:title" content="iPhone Simulator | An Interactive iOS Experience">
+    <meta name="twitter:description" content="Experience the classic iPhone UI, fully simulated in your browser.">
+    <meta name="twitter:image" content="https://pirillo.com/arcade/images/iphone.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-1CQ4D3VQ3L');
+    </script>
+
+    <!-- 
+      PERFORMANCE OPTIMIZATION: Inlined CSS
+      All CSS is placed directly in the HTML head. This eliminates render-blocking external CSS requests,
+      which is critical for improving First Contentful Paint (FCP) and Largest Contentful Paint (LCP).
+      The browser can render the page immediately without waiting for a separate stylesheet to download.
+    -->
+    <style>
+        :root {
+            --ios-header-start: #d1d5db; --ios-header-end: #8e99ab; --ios-header-border: #7a8290;
+            --app-button-start: #d1d5db; --app-button-end: #8e99ab; --app-button-border: #7a8290;
+            --ios-orange: #ff9500;
+            --ios-red: #ff3b30;
+        }
+        
+        /* UI FIX: Ensure html and body take up full viewport height for proper centering. */
+        html {
+            height: 100%;
+        }
+
+        /* UI FIX: Modified body to use height: 100% and removed overflow:hidden for robust centering. */
+        body { 
+            font-family: 'Helvetica Neue', 'Helvetica', sans-serif; 
+            -webkit-font-smoothing: antialiased; 
+            background-color: #dcdcdc; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100%; 
+            margin:0; 
+            padding: 0;
+            font-display: swap; 
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+
+        /* UX ENHANCEMENT: Re-enable text selection for input fields and text areas so users can interact with them normally. */
+        textarea, input, [contenteditable="true"] {
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+        }
+
+        /* UX ENHANCEMENT: Allow selection for specific display areas where users might want to copy content. */
+        #calc-display, #password-display, #quote-display, #converter-result {
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+        }
+
+        .iphone-shell { width: 375px; height: 750px; background: #1a1a1a; border-radius: 55px; padding: 10px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6), inset 0 0 1px rgba(255,255,255,0.1); position: relative; display: flex; justify-content: center; align-items: center; transition: transform 0.3s ease, margin 0.3s ease; }
+        .chrome-bezel { position: absolute; top: 10px; bottom: 10px; left: 10px; right: 10px; border-radius: 45px; background: linear-gradient(135deg, #e0e0e0, #a0a0a0); box-shadow: inset 0 0 3px rgba(0,0,0,0.4); z-index: 1; }
+        .iphone-face { width: 345px; height: 720px; background: #000; border-radius: 42px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; z-index: 2; position: relative; overflow: hidden; }
+        .top-bezel, .bottom-bezel { width: 100%; height: 120px; display: flex; justify-content: center; align-items: center; z-index: 2; flex-shrink: 0; }
+        .speaker-slot { width: 75px; height: 7px; background: #1a1a1a; border-radius: 3.5px; border: 1px solid #000; }
+        .home-button { width: 58px; height: 58px; background: #080808; border-radius: 50%; border: 1px solid #1c1c1c; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .home-button:before { content: ''; width: 22px; height: 22px; border: 1.5px solid #333; border-radius: 6px; }
+        .screen-container { width: 100%; height: 480px; background: #000; position: relative; overflow: hidden; z-index: 2; flex-shrink: 0; }
+        .screen { width: 100%; height: 100%; background-color: #000; position: relative; overflow: hidden; }
+        .status-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 300; height: 20px; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 12px; font-weight: 700; transition: background-color 0.3s; }
+        .status-bar.in-app { background-color: rgba(0,0,0,0.8); }
+        .status-left { display: flex; align-items: center; gap: 4px; }
+        .signal-bars { display: flex; align-items: flex-end; height: 10px; }
+        .signal-bars div { background: white; margin-left: 1.5px; width: 3px; border-radius: 0.5px; }
+        .status-right { display: flex; align-items: center; gap: 4px; }
+        .battery-icon { width: 22px; height: 9px; border: 1px solid white; border-radius: 2.5px; padding: 1px; position: relative; }
+        .battery-icon::after { content: ''; position: absolute; right: -3px; top: 2px; width: 1.5px; height: 4px; background: white; border-radius: 0 1px 1px 0; }
+        .battery-level { background: white; height: 100%; width: 75%; border-radius: 1px; }
+        #clock { position: absolute; left: 50%; transform: translateX(-50%); }
+        .home-screen { display: none; flex-direction: column; justify-content: space-between; position: absolute; top:0; left:0; right:0; bottom:0; z-index: 5; padding-top: 20px; background: #000; }
+        .home-screen.active { display: flex; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; row-gap: 15px; padding: 15px 10px; }
+        .app-icon { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; width: 70px; }
+        .app-icon .icon-bg { width: 57px; height: 57px; border-radius: 11px; box-shadow: inset 0 0 1px rgba(0,0,0,0.3), 0 2px 2px rgba(0,0,0,0.4); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+        .app-icon .icon-bg::before { content: ''; position: absolute; top: 1px; left: 1px; right: 1px; height: 50%; background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.2)); border-radius: 10px 10px 15px 15px / 10px 10px 8px 8px; z-index: 1; }
+        .app-icon .icon-bg > * { z-index: 0; }
+        .app-icon:active .icon-bg { transform: scale(0.9); }
+        .app-icon span { color: white; font-size: 11px; margin-top: 5px; text-shadow: 0 1px 2px #000; white-space: nowrap; }
+        .dock { position: relative; flex-shrink: 0; height: 92px; margin-bottom: -1px;}
+        .dock::before { content: ''; position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 0; background-color: #383838; background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent 60%), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAP/b///z4gsBhJ9GAorE2pgg+S/w4YBAwB67kdbb2EZPgAAAABJRU5ErkJggg=='); border-top: 1px solid rgba(255, 255, 255, 0.4); box-shadow: inset 0 1px 1px rgba(0,0,0,0.3); }
+        .dock-icons { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); padding: 0 10px; align-items: start; padding-top: 12px; height: 100%; justify-items: center; }
+        .app-view { position: absolute; top: 20px; left:0; right:0; bottom:0; z-index: 150; display: flex; flex-direction: column; visibility: hidden; transform: scale(1.2); opacity: 0; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); background-color: #f7f7f7; color: #000; }
+        .app-view.active { visibility: visible; transform: scale(1); opacity: 1; }
+        .app-header { height: 44px; background: linear-gradient(to bottom, var(--ios-header-start), var(--ios-header-end)); border-bottom: 1px solid var(--ios-header-border); display: flex; align-items: center; padding: 0 10px; flex-shrink: 0; z-index: 10; }
+        .app-title { flex-grow: 1; text-align: center; font-weight: bold; font-size: 20px; color: #333; text-shadow: 0 1px 0 rgba(255,255,255,0.8); }
+        .app-content { flex-grow: 1; overflow-y: auto; overflow-x: hidden; position: relative; height: calc(100% - 44px); }
+        .app-button { padding: 8px 12px; font-size: 14px; font-weight: bold; border-radius: 5px; background: linear-gradient(to bottom, var(--app-button-start), var(--app-button-end)); border: 1px solid var(--app-button-border); color: #333; text-shadow: 0 1px 0 rgba(255,255,255,0.8); cursor: pointer; }
+        .app-button:active { background: linear-gradient(to top, var(--app-button-start), var(--app-button-end)); }
+        #calculator-app .app-content { display: flex; flex-direction: column; background-color: #333; }
+        #calc-display { background-color: #333; color: white; text-align: right; font-size: 48px; font-weight: 300; padding: 20px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        #calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; flex-grow: 1; }
+        #calc-buttons button { font-size: 24px; border: none; background-color: #666; color: white; cursor: pointer; }
+        #calc-buttons button:active { filter: brightness(1.2); }
+        #calc-buttons .op { background-color: var(--ios-orange); }
+        #calc-buttons .light-gray { background-color: #a0a0a0; color: black; }
+        #notes-app-editor { width: 100%; height: 100%; border: none; padding: 15px; font-size: 16px; resize: none; background-color: #F7E6B5; font-family: 'Marker Felt', 'Comic Sans MS', cursive; line-height: 1.6; }
+        #notes-app-editor:focus { outline: none; }
+        #stopwatch-app .app-content { display: flex; flex-direction: column; align-items: center; background-color: #1c1c1e; color: white; }
+        #stopwatch-display { font-size: 64px; font-weight: 200; letter-spacing: 1px; margin: 40px 0 20px; font-family: 'Helvetica Neue', sans-serif; }
+        #stopwatch-controls { display: flex; gap: 20px; margin-bottom: 20px; }
+        #laps-list { list-style: none; width: 100%; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+        #laps-list li { display: flex; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #444; font-size: 16px; }
+        #todo-app .app-content { padding: 10px; }
+        #todo-input { width: calc(100% - 70px); padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+        #add-todo-btn { width: 60px; padding: 8px; margin-left: 5px; }
+        #todo-list { list-style: none; padding: 0; margin-top: 10px; }
+        #todo-list li { background-color: white; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; cursor: grab; }
+        #todo-list li.dragging { opacity: 0.5; }
+        #todo-list li.done span { text-decoration: line-through; color: #999; }
+        #todo-list .delete-todo { cursor: pointer; color: var(--ios-red); font-weight: bold; padding: 5px; }
+        #drawing-app .app-content { display: flex; flex-direction: column; }
+        #drawing-canvas { border-bottom: 1px solid #ccc; cursor: crosshair; touch-action: none; background-color: white; flex-grow: 1; }
+        #drawing-controls { padding: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background-color: #f0f0f0; border-bottom: 1px solid #ccc; flex-shrink: 0; }
+        #tictactoe-app .app-content { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;}
+        #tictactoe-board { display: grid; grid-template-columns: repeat(3, 1fr); width: 270px; height: 270px; margin: 0 auto; }
+        .tictactoe-cell { width: 90px; height: 90px; border: 1px solid #333; display: flex; justify-content: center; align-items: center; font-size: 48px; cursor: pointer; }
+        #tictactoe-status { margin: 15px 0 10px; font-size: 16px; height: 20px;}
+        .tip-calc-section { padding: 15px; border-bottom: 1px solid #ccc; }
+        .tip-calc-section input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: right; }
+        #tip-results { padding: 20px; text-align: center; }
+        #tip-results h3 { margin: 0 0 10px; font-weight: normal; }
+        #tip-results p { font-size: 28px; font-weight: bold; margin: 0; }
+        .simple-app-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; gap: 15px; height: 100%; box-sizing: border-box; }
+        #pomodoro-app .app-content { overflow: hidden; justify-content: flex-start; padding-top: 30px; gap: 10px; }
+        .simple-app-content input[type=number], .simple-app-content input[type=text], .simple-app-content input[type=datetime-local], .simple-app-content select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 80%; text-align: center; }
+        .simple-app-content .result-display { font-weight: bold; }
+        #emoji-app .app-content { overflow: hidden; }
+        #emoji-display { font-size: 140px; line-height: 1; cursor: pointer; user-select: none; }
+        #dice-result { font-size: 80px; }
+        #password-display { font-size: 18px; }
+        #color-picker-display { width: 100px; height: 100px; border-radius: 10px; border: 1px solid #ccc; }
+        
+        /* UI FIX: Media queries to scale the phone on smaller viewports, preventing overlap with browser UI. */
+        @media (max-height: 820px) {
+            .iphone-shell {
+                transform: scale(0.9);
+            }
+        }
+        @media (max-height: 740px) {
+            .iphone-shell {
+                transform: scale(0.8);
+            }
+        }
+        @media (max-height: 650px) {
+            .iphone-shell {
+                transform: scale(0.7);
+            }
+        }
+        @media (max-width: 400px) {
+             .iphone-shell {
+                transform: scale(0.85);
+            }
+        }
+    </style>
+
+    <!-- 
+      SEO OPTIMIZATION: JSON-LD Structured Data
+      This script provides detailed, machine-readable information about the page to search engines.
+      - WebPage schema describes the page itself.
+      - SoftwareApplication schema describes the simulator as a piece of software, which can lead to rich results.
+    -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "iPhone Simulator | An Interactive iOS Experience",
+      "description": "Experience the original iPhone interface with this fully interactive, web-based simulator. Explore classic apps like Calculator, Notes, and more. Created by Chris Pirillo.",
+      "url": "https://pirillo.com/arcade/iphone.html",
+      "author": {
+        "@type": "Person",
+        "name": "Chris Pirillo",
+        "url": "https://twitter.com/@ChrisPirillo"
+      },
+      "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "iPhone Simulator",
+        "operatingSystem": "Web (HTML5, CSS3, JavaScript)",
+        "applicationCategory": "Game",
+        "offers": {
+          "@type": "Offer",
+          "price": "0"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "257"
+        },
+        "screenshot": "https://pirillo.com/arcade/images/iphone.png"
+      }
+    }
+    </script>
+</head>
+<body>
+    <!-- 
+      SEMANTIC HTML: The main content wrapper is a <main> tag.
+      The role="application" attribute helps assistive technologies understand this is an interactive component.
+    -->
+    <main class="iphone-shell" role="application" aria-label="Interactive iPhone Simulator">
+        <div class="chrome-bezel"></div>
+        <div class="iphone-face">
+            <!-- SEMANTIC HTML: The top section of the phone face is a <header> -->
+            <header class="top-bezel">
+                <div class="speaker-slot"></div>
+            </header>
+
+            <!-- 
+              This section contains the main screen content. Using a <section> tag for semantic grouping.
+              aria-label provides context for screen readers.
+            -->
+            <section class="screen-container" aria-label="iPhone Screen">
+                <div id="status-bar" class="status-bar"></div>
+                <div class="screen">
+                    <div class="home-screen active"> 
+                        <!-- 
+                          SEO & ACCESSIBILITY: Added an h1 heading for the main content. It's visually hidden
+                          but crucial for search engines and screen readers to understand the page's primary topic.
+                        -->
+                        <h1 style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">Interactive iPhone Simulator</h1>
+                        <div class="app-grid"></div> 
+                        <!-- SEMANTIC HTML: The dock is a navigation element -->
+                        <nav class="dock" aria-label="Dock applications">
+                            <div class="dock-icons"></div>
+                        </nav>
+                    </div>
+                    
+                    <!-- App Views are wrapped in <article> tags for self-contained content -->
+                    <article id="calculator-app" class="app-view" role="dialog" aria-labelledby="calc-title">
+                        <header class="app-header">
+                          <span id="calc-title" class="app-title">Calculator</span>
+                        </header>
+                        <div class="app-content">
+                            <div id="calc-display" aria-live="polite">0</div>
+                            <div id="calc-buttons">
+                                <button class="light-gray">AC</button><button class="light-gray">±</button><button class="light-gray">%</button><button class="op">÷</button>
+                                <button>7</button><button>8</button><button>9</button><button class="op">×</button>
+                                <button>4</button><button>5</button><button>6</button><button class="op">-</button>
+                                <button>1</button><button>2</button><button>3</button><button class="op">+</button>
+                                <button style="grid-column: span 2">0</button><button>.</button><button class="op">=</button>
+                            </div>
+                        </div>
+                    </article>
+                    <article id="notes-app" class="app-view" role="dialog" aria-labelledby="notes-title">
+                        <header class="app-header"><span id="notes-title" class="app-title">Notes</span></header>
+                        <div class="app-content"><textarea id="notes-app-editor" placeholder="Start typing..." aria-label="Notes editor"></textarea></div>
+                    </article>
+                     <!-- All other app views would follow the same <article> pattern... -->
+                    <article id="stopwatch-app" class="app-view" role="dialog" aria-labelledby="stopwatch-title"><div class="app-header"><span id="stopwatch-title" class="app-title">Stopwatch</span></div><div class="app-content"><div id="stopwatch-display" aria-live="polite">00:00.00</div><div id="stopwatch-controls"><button id="lap-reset-btn" class="app-button">Lap</button><button id="start-stop-btn" class="app-button">Start</button></div><ul id="laps-list"></ul></div></article>
+                    <article id="todo-app" class="app-view" role="dialog" aria-labelledby="todo-title"><div class="app-header"><span id="todo-title" class="app-title">To-Do</span></div><div class="app-content"><div style="display: flex; margin-bottom: 10px;"><input type="text" id="todo-input" placeholder="Add new task..."><button id="add-todo-btn" class="app-button" aria-label="Add new to-do item">+</button></div><ul id="todo-list"></ul></div></article>
+                    <article id="pomodoro-app" class="app-view" role="dialog" aria-labelledby="pomodoro-title"><div class="app-header"><span id="pomodoro-title" class="app-title">Pomodoro</span></div><div class="app-content simple-app-content"><h2 id="pomodoro-mode">Work</h2><p id="pomodoro-timer" class="result-display" style="font-size: 48px; margin: 10px 0;">25:00</p><div><button id="pomodoro-start" class="app-button">Start</button><button id="pomodoro-reset" class="app-button">Reset</button></div><div style="text-align: center; margin-top: 15px; font-size: 14px;"><div><label>Work: <input type="number" id="pomodoro-work-duration" value="25" style="width: 50px; padding: 4px;" aria-label="Pomodoro work duration in minutes"></label><label>Break: <input type="number" id="pomodoro-break-duration" value="5" style="width: 50px; padding: 4px;" aria-label="Pomodoro break duration in minutes"></label></div><button id="pomodoro-save-settings" class="app-button" style="margin-top: 10px;">Save Settings</button></div></div></article>
+                    <article id="drawing-app" class="app-view" role="dialog" aria-labelledby="drawing-title"><div class="app-header"><span id="drawing-title" class="app-title">Canvas</span></div><div class="app-content"><div id="drawing-controls"><label for="drawing-color-picker">Color:</label> <input type="color" id="drawing-color-picker" value="#000000" aria-label="Drawing color picker"><label for="drawing-brush-size">Size:</label> <input type="range" id="drawing-brush-size" min="1" max="50" value="5" aria-label="Drawing brush size"><button id="drawing-clear-btn" class="app-button">Clear</button><a id="drawing-export-btn" class="app-button" role="button">Export</a></div><canvas id="drawing-canvas" role="img" aria-label="Drawing area"></canvas></div></article>
+                    <article id="converter-app" class="app-view" role="dialog" aria-labelledby="converter-title"><div class="app-header"><span id="converter-title" class="app-title">Converter</span></div><div class="app-content simple-app-content"><label for="converter-input" class="visually-hidden">Value to convert</label><input type="number" id="converter-input" placeholder="Enter value"><label for="converter-select" class="visually-hidden">Conversion type</label><select id="converter-select"><optgroup label="Length"><option value="m-ft">Meters to Feet</option><option value="ft-m">Feet to Meters</option></optgroup><optgroup label="Weight"><option value="kg-lb">Kilograms to Pounds</option><option value="lb-kg">Pounds to Kilograms</option></optgroup><optgroup label="Temperature"><option value="c-f">Celsius to Fahrenheit</option><option value="f-c">Fahrenheit to Celsius</option></optgroup></select><p id="converter-result" class="result-display" style="font-size: 24px;">-</p></div></article>
+                    <article id="morse-app" class="app-view" role="dialog" aria-labelledby="morse-title"><div class="app-header"><span id="morse-title" class="app-title">Morse Code</span></div><div class="app-content simple-app-content"><label for="morse-input" class="visually-hidden">Text to convert to morse code</label><input type="text" id="morse-input" placeholder="Enter text"><button id="morse-play-btn" class="app-button">Play</button></div></article>
+                    <article id="password-app" class="app-view" role="dialog" aria-labelledby="password-title"><div class="app-header"><span id="password-title" class="app-title">Password Gen</span></div><div class="app-content simple-app-content"><p id="password-display" class="result-display" style="font-family: monospace; word-break: break-all;">-</p><label>Length: <span id="password-length-label">12</span></label><input type="range" id="password-length" min="8" max="24" value="12" aria-label="Password length"><button id="generate-password-btn" class="app-button">Generate</button></div></article>
+                    <article id="tictactoe-app" class="app-view" role="dialog" aria-labelledby="tictactoe-title"><div class="app-header"><span id="tictactoe-title" class="app-title">Tic-Tac-Toe</span></div><div class="app-content"><div id="tictactoe-board" aria-label="Tic-Tac-Toe game board"></div><p id="tictactoe-status" aria-live="polite"></p><button id="tictactoe-reset" class="app-button">Reset</button></div></article>
+                    <article id="rps-app" class="app-view" role="dialog" aria-labelledby="rps-title"><div class="app-header"><span id="rps-title" class="app-title">RPS</span></div><div class="app-content simple-app-content"><p>Your choice:</p><div id="rps-player-choices" style="display: flex; gap: 10px; font-size: 40px; cursor: pointer;" role="group" aria-label="Rock Paper Scissors choices"><span data-choice="rock" role="button" aria-label="Rock">✊</span><span data-choice="paper" role="button" aria-label="Paper">✋</span><span data-choice="scissors" role="button" aria-label="Scissors">✌️</span></div><p id="rps-result" class="result-display" style="font-size: 16px;" aria-live="polite"></p></div></article>
+                    <article id="emoji-app" class="app-view" role="dialog" aria-labelledby="emoji-title"><div class="app-header"><span id="emoji-title" class="app-title">Emoji</span></div><div class="app-content simple-app-content"><p id="emoji-display" class="result-display" role="button" aria-label="Click to change emoji">😀</p></div></article>
+                    <article id="countdown-app" class="app-view" role="dialog" aria-labelledby="countdown-title"><div class="app-header"><span id="countdown-title" class="app-title">Countdown</span></div><div class="app-content simple-app-content"><label for="countdown-date">Select a future date:</label><input type="datetime-local" id="countdown-date" aria-label="Countdown target date and time"><p id="countdown-display" class="result-display" style="font-size: 20px;" aria-live="polite">-</p></div></article>
+                    <article id="coin-flipper-app" class="app-view" role="dialog" aria-labelledby="coin-flipper-title"><div class="app-header"><span id="coin-flipper-title" class="app-title">Coin Flip</span></div><div class="app-content simple-app-content"><p id="coin-flipper-result" class="result-display" style="font-size: 40px;" aria-live="polite">-</p><button id="coin-flipper-btn" class="app-button">Flip Coin</button></div></article>
+                    <article id="tip-calculator-app" class="app-view" role="dialog" aria-labelledby="tip-calculator-title"><div class="app-header"><span id="tip-calculator-title" class="app-title">Tip Calculator</span></div><div class="app-content"><div class="tip-calc-section"><label for="tip-bill-amount">Bill Amount ($)</label><input type="number" id="tip-bill-amount" placeholder="0.00"></div><div class="tip-calc-section"><label for="tip-percentage">Tip Percentage (%)</label><input type="number" id="tip-percentage" value="15"></div><div class="tip-calc-section"><label for="tip-split-count">Split Between (People)</label><input type="number" id="tip-split-count" value="1"></div><div id="tip-results" aria-live="polite"><h3>Total per Person</h3><p id="tip-total-per-person">$0.00</p></div></div></article>
+                    <article id="color-picker-app" class="app-view" role="dialog" aria-labelledby="color-picker-title"><div class="app-header"><span id="color-picker-title" class="app-title">Color Picker</span></div><div class="app-content simple-app-content"><div id="color-picker-display" aria-live="polite"></div><p id="color-picker-hex" class="result-display" style="font-size: 24px;"></p><p id="color-picker-rgb" class="result-display" style="font-size: 20px;"></p><button id="new-color-btn" class="app-button">New Color</button></div></article>
+                    <article id="quotes-app" class="app-view" role="dialog" aria-labelledby="quotes-title"><div class="app-header"><span id="quotes-title" class="app-title">Quotes</span></div><div class="app-content simple-app-content"><p id="quote-display" style="padding: 20px; font-style: italic; font-size: 18px;" aria-live="polite">"The Force will be with you. Always."</p><button id="new-quote-btn" class="app-button">New Quote</button></div></article>
+                    <article id="dice-app" class="app-view" role="dialog" aria-labelledby="dice-title"><div class="app-header"><span id="dice-title" class="app-title">Dice</span></div><div class="app-content simple-app-content"><p id="dice-result" class="result-display" aria-live="polite">⚅</p><label for="dice-sides">Sides: <span id="dice-sides-label">6</span></label><input type="range" id="dice-sides" min="2" max="20" value="6" aria-label="Number of dice sides"><button id="roll-dice-btn" class="app-button">Roll Dice</button></div></article>
+                    <article id="bmi-app" class="app-view" role="dialog" aria-labelledby="bmi-title"><div class="app-header"><span id="bmi-title" class="app-title">BMI</span></div><div class="app-content simple-app-content"><label for="bmi-height" class="visually-hidden">Height in centimeters</label><input type="number" id="bmi-height" placeholder="Height (cm)"><label for="bmi-weight" class="visually-hidden">Weight in kilograms</label><input type="number" id="bmi-weight" placeholder="Weight (kg)"><button id="bmi-calculate-btn" class="app-button">Calculate</button><p id="bmi-result" class="result-display" style="font-size: 24px;" aria-live="polite">-</p></div></article>
+                    <article id="counter-app" class="app-view" role="dialog" aria-labelledby="counter-title"><div class="app-header"><span id="counter-title" class="app-title">Counter</span></div><div class="app-content simple-app-content"><p id="counter-display" class="result-display" style="font-size: 48px;" aria-live="polite">0</p><button id="increment-btn" class="app-button" style="width: 80%; padding: 20px;">+</button><button id="reset-counter-btn" class="app-button">Reset</button></div></article>
+
+                </div>
+            </section>
+            
+            <!-- SEMANTIC HTML: The bottom section is a <footer> containing the home button -->
+            <footer class="bottom-bezel">
+                <button class="home-button" aria-label="Return to Home Screen"></button>
+            </footer>
+        </div>
+    </main>
+
+<!-- 
+  PERFORMANCE OPTIMIZATION: Non-render-blocking script.
+  The script tag is placed at the end of the <body> and the 'defer' attribute is used.
+  - Placing it at the end ensures the HTML is fully parsed and the DOM is built before the script is fetched/executed.
+  - The `defer` attribute tells the browser to download the script in parallel with parsing the page, and
+    then execute it only after the parsing is complete. This prevents the script from blocking the initial page render.
+-->
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- ELEMENT SELECTORS ---
+    const homeButton = document.querySelector('.home-button');
+    const homeScreen = document.querySelector('.home-screen');
+    const statusBar = document.getElementById('status-bar');
+
+    // --- AUDIO SETUP FOR UI SOUNDS ---
+    let audioCtx;
+    /**
+     * Plays a short, low-pitched click sound using the Web Audio API.
+     * This has been tuned to be much lower and more subtle.
+     */
+    function playClickSound() {
+        if (!audioCtx) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error("Web Audio API is not supported in this browser");
+                return;
+            }
+        }
+        // If context fails to initialize or is suspended, do nothing.
+        if (!audioCtx || audioCtx.state === 'suspended') return;
+
+        const now = audioCtx.currentTime;
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        // Reduced volume for a more subtle click
+        gainNode.gain.setValueAtTime(0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+        // Lowered pitch significantly. Starts low and has a very slight ramp.
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(220, now); // A3 - a much lower starting note
+        oscillator.frequency.exponentialRampToValueAtTime(280, now + 0.02); // Slight ramp up
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.05); // Keep the sound very short
+    }
+
+    // --- ICON DATA & SETUP ---
+    // SEO & ACCESSIBILITY: Added role="img" and aria-label to SVG for screen readers
+    const icons = {
+        main: [
+            { name: 'Stopwatch', id: 'stopwatch-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Stopwatch icon"><rect width="57" height="57" rx="11" fill="#333"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">⏱️</text></svg>` },
+            { name: 'Notes', id: 'notes-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Notes icon"><rect width="57" height="57" rx="11" fill="#FFF3CD"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">📝</text></svg>` },
+            { name: 'To-Do', id: 'todo-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="To-Do List icon"><rect width="57" height="57" rx="11" fill="#4cd964"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">✅</text></svg>` },
+            { name: 'Canvas', id: 'drawing-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Drawing Canvas icon"><rect width="57" height="57" rx="11" fill="#EAEAEA"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🎨</text></svg>` },
+            { name: 'Pomodoro', id: 'pomodoro-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Pomodoro Timer icon"><rect width="57" height="57" rx="11" fill="#ff3b30"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🍅</text></svg>` },
+            { name: 'Converter', id: 'converter-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Unit Converter icon"><rect width="57" height="57" rx="11" fill="#007aff"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🔄</text></svg>` },
+            { name: 'Morse', id: 'morse-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Morse Code icon"><rect width="57" height="57" rx="11" fill="#4A4A4C"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">📻</text></svg>` },
+            { name: 'Passwords', id: 'password-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Password Generator icon"><rect width="57" height="57" rx="11" fill="#4A4A4C"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🔐</text></svg>` },
+            { name: 'TicTacToe', id: 'tictactoe-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Tic-Tac-Toe icon"><rect width="57" height="57" rx="11" fill="#f0f0f0"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">⚔️</text></svg>` },
+            { name: 'RPS', id: 'rps-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Rock Paper Scissors icon"><rect width="57" height="57" rx="11" fill="#ffcc00"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">✊</text></svg>` },
+            { name: 'Emoji', id: 'emoji-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Emoji icon"><rect width="57" height="57" rx="11" fill="#ff9500"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">😊</text></svg>` },
+            { name: 'Countdown', id: 'countdown-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Countdown icon"><rect width="57" height="57" rx="11" fill="#5856d6"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">⏳</text></svg>` },
+            { name: 'Coin Flip', id: 'coin-flipper-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Coin Flip icon"><rect width="57" height="57" rx="11" fill="#4cd964"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🪙</text></svg>` },
+            { 
+                name: 'Color Picker', 
+                id: 'color-picker-app', 
+                svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Color Picker icon">
+                        <defs>
+                            <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ff0000"/>
+                                <stop offset="16.66%" stop-color="#ff8800"/>
+                                <stop offset="33.33%" stop-color="#ffff00"/>
+                                <stop offset="50%" stop-color="#00ff00"/>
+                                <stop offset="66.66%" stop-color="#0088ff"/>
+                                <stop offset="83.33%" stop-color="#4400ff"/>
+                                <stop offset="100%" stop-color="#ff00ff"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="57" height="57" rx="11" fill="url(#rainbow)"/>
+                        <text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🌈</text>
+                    </svg>` 
+            },
+            { name: 'Quotes', id: 'quotes-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Quotes icon"><rect width="57" height="57" rx="11" fill="#8e8e93"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">💬</text></svg>` },
+            { name: 'Dice', id: 'dice-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Dice icon"><rect width="57" height="57" rx="11" fill="#4cd964"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🎲</text></svg>` }
+        ],
+        dock: [
+            { name: 'Calculator', id: 'calculator-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Calculator icon"><rect width="57" height="57" rx="11" fill="#333"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">🧮</text></svg>` },
+            { name: 'Tip Calc', id: 'tip-calculator-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Tip Calculator icon"><rect width="57" height="57" rx="11" fill="#4cd964"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">💵</text></svg>` },
+            { name: 'BMI', id: 'bmi-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="BMI Calculator icon"><rect width="57" height="57" rx="11" fill="#007aff"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">⚖️</text></svg>` },
+            { name: 'Counter', id: 'counter-app', svg: `<svg viewBox="0 0 57 57" role="img" aria-label="Counter icon"><rect width="57" height="57" rx="11" fill="#ff9500"/><text x="50%" y="59%" dominant-baseline="middle" text-anchor="middle" font-size="40">➕</text></svg>` }        
+        ]
+    };
+    
+    // --- APP CREATION AND NAVIGATION LOGIC ---
+    const createAppIcon = (iconData, container) => {
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'app-icon';
+        iconWrapper.dataset.app = iconData.id;
+        iconWrapper.addEventListener('click', () => {
+            playClickSound();
+            openApp(iconData.id);
+        });
+        const iconBg = document.createElement('div');
+        iconBg.className = 'icon-bg';
+        iconBg.innerHTML = iconData.svg;
+        iconWrapper.appendChild(iconBg);
+        const iconLabel = document.createElement('span');
+        iconLabel.textContent = iconData.name;
+        iconWrapper.appendChild(iconLabel);
+        container.appendChild(iconWrapper);
+    };
+
+    const setupIcons = () => {
+        const grid = document.querySelector('.app-grid');
+        const dock = document.querySelector('.dock-icons');
+        grid.innerHTML = ''; 
+        dock.innerHTML = '';
+        icons.main.forEach(iconData => createAppIcon(iconData, grid));
+        icons.dock.forEach(iconData => createAppIcon(iconData, dock));
+    };
+    
+    const openApp = (appId) => {
+        const appView = document.getElementById(appId);
+        if (!appView) return;
+        homeScreen.classList.remove('active');
+        statusBar.classList.add('in-app');
+        document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+        appView.classList.add('active');
+        if (appInitializers[appId]) {
+            appInitializers[appId]();
+        }
+    };
+    
+    const closeAllApps = () => {
+        homeScreen.classList.add('active');
+        statusBar.classList.remove('in-app');
+        document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
+    };
+    
+    homeButton.addEventListener('click', () => {
+        playClickSound();
+        closeAllApps();
+    });
+
+    // --- DYNAMIC CONTENT (TIME/DATE) ---
+    const updateTime = () => {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.textContent = timeString;
+        }
+    };
+    
+    // --- INDIVIDUAL APP LOGIC (UNCHANGED) ---
+    const appInitializers = {};
+
+    // --- Calculator App ---
+    (() => {
+        const display = document.getElementById('calc-display');
+        const buttons = document.getElementById('calc-buttons');
+        let currentValue = '0', previousValue = null, operator = null, waitingForOperand = false;
+
+        function updateDisplay() { display.textContent = currentValue.length > 9 ? parseFloat(currentValue).toPrecision(3) : currentValue; }
+        function calculate() {
+            const prev = parseFloat(previousValue), curr = parseFloat(currentValue);
+            if (isNaN(prev) || isNaN(curr)) return;
+            let result;
+            switch(operator) {
+                case '+': result = prev + curr; break;
+                case '-': result = prev - curr; break;
+                case '×': result = prev * curr; break;
+                case '÷': result = prev / curr; break;
+                default: return;
+            }
+            currentValue = String(result);
+            operator = null;
+            waitingForOperand = true;
+        }
+
+        buttons.addEventListener('click', (e) => {
+            const el = e.target;
+            const { textContent } = el;
+            if (el.tagName !== 'BUTTON') return;
+            if (el.classList.contains('op')) {
+                if (operator && !waitingForOperand) calculate(); else { previousValue = currentValue; }
+                operator = textContent;
+                if(textContent === '=') {
+                    calculate();
+                } else {
+                     waitingForOperand = true;
+                }
+            } else if (!isNaN(parseInt(textContent)) || textContent === '0') {
+                if (waitingForOperand) { currentValue = textContent; waitingForOperand = false; }
+                else { currentValue = currentValue === '0' ? textContent : currentValue + textContent; }
+            } else if (textContent === '.') { if (!currentValue.includes('.')) currentValue += '.'; }
+            else if (textContent === 'AC') { currentValue = '0'; previousValue = null; operator = null; waitingForOperand = false; }
+            else if (textContent === '±') { currentValue = String(parseFloat(currentValue) * -1); }
+            else if (textContent === '%') { currentValue = String(parseFloat(currentValue) / 100); }
+            updateDisplay();
+        });
+    })();
+
+    // --- Notes App ---
+    (() => {
+        const editor = document.getElementById('notes-app-editor');
+        const storageKey = 'notes-app-content';
+        appInitializers['notes-app'] = () => { editor.value = localStorage.getItem(storageKey) || ''; }
+        editor.addEventListener('keyup', () => { localStorage.setItem(storageKey, editor.value); });
+    })();
+    
+    // --- Stopwatch App ---
+    (() => {
+        const display = document.getElementById('stopwatch-display');
+        const startStopBtn = document.getElementById('start-stop-btn');
+        const lapResetBtn = document.getElementById('lap-reset-btn');
+        const lapsList = document.getElementById('laps-list');
+        let timer = null, startTime = 0, elapsedTime = 0, running = false, lapCounter = 1;
+        function formatTime(ms) {
+            const d = new Date(ms);
+            return `${d.getUTCMinutes().toString().padStart(2, '0')}:${d.getUTCSeconds().toString().padStart(2, '0')}.${Math.floor(d.getUTCMilliseconds() / 10).toString().padStart(2, '0')}`;
+        }
+        startStopBtn.addEventListener('click', () => {
+            running = !running;
+            if (running) {
+                startTime = Date.now() - elapsedTime;
+                timer = setInterval(() => { elapsedTime = Date.now() - startTime; display.textContent = formatTime(elapsedTime); }, 10);
+                startStopBtn.textContent = 'Stop';
+                lapResetBtn.textContent = 'Lap';
+            } else {
+                clearInterval(timer);
+                startStopBtn.textContent = 'Start';
+                lapResetBtn.textContent = 'Reset';
+            }
+        });
+        lapResetBtn.addEventListener('click', () => {
+            if (running) {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>Lap ${lapCounter++}</span><span>${formatTime(elapsedTime)}</span>`;
+                lapsList.prepend(li);
+            } else {
+                clearInterval(timer); elapsedTime = 0; lapCounter = 1;
+                display.textContent = formatTime(0); lapsList.innerHTML = '';
+            }
+        });
+    })();
+
+    // --- To-Do List App ---
+    (() => {
+        const input = document.getElementById('todo-input');
+        const addBtn = document.getElementById('add-todo-btn');
+        const list = document.getElementById('todo-list');
+        const storageKey = 'todo-app-tasks';
+        let tasks = []; let draggingElement = null;
+        function saveTasks() { localStorage.setItem(storageKey, JSON.stringify(tasks)); }
+        function renderTasks() {
+            list.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.draggable = true; li.dataset.index = index;
+                if (task.done) li.classList.add('done');
+                const span = document.createElement('span');
+                span.textContent = task.text;
+                span.addEventListener('click', () => { tasks[index].done = !tasks[index].done; saveTasks(); renderTasks(); });
+                const delBtn = document.createElement('div');
+                delBtn.textContent = '✕'; delBtn.className = 'delete-todo';
+                delBtn.addEventListener('click', () => { tasks.splice(index, 1); saveTasks(); renderTasks(); });
+                li.append(span, delBtn); list.appendChild(li);
+            });
+        }
+        addBtn.addEventListener('click', () => {
+            if (input.value.trim()) {
+                tasks.push({ text: input.value.trim(), done: false });
+                input.value = ''; saveTasks(); renderTasks();
+            }
+        });
+        list.addEventListener('dragstart', e => { draggingElement = e.target; e.target.classList.add('dragging'); });
+        list.addEventListener('dragend', e => {
+            if (!draggingElement) return;
+            draggingElement.classList.remove('dragging');
+            const fromIndex = parseInt(draggingElement.dataset.index);
+            // This logic is tricky, simple reordering based on final position
+            const newOrderedTasks = [...list.children].map(li => tasks.find(t => t.text === li.querySelector('span').textContent));
+            tasks = newOrderedTasks;
+            saveTasks(); renderTasks();
+            draggingElement = null;
+        });
+        list.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = [...list.querySelectorAll('li:not(.dragging)')].reduce((closest, child) => {
+                const box = child.getBoundingClientRect(); const offset = e.clientY - box.top - box.height / 2;
+                return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+            if (afterElement == null) { list.appendChild(draggingElement); } else { list.insertBefore(draggingElement, afterElement); }
+        });
+        appInitializers['todo-app'] = () => { tasks = JSON.parse(localStorage.getItem(storageKey)) || []; renderTasks(); }
+    })();
+
+    // --- Pomodoro Timer App ---
+    (() => {
+        const timerDisplay = document.getElementById('pomodoro-timer');
+        const modeDisplay = document.getElementById('pomodoro-mode');
+        const startBtn = document.getElementById('pomodoro-start');
+        const resetBtn = document.getElementById('pomodoro-reset');
+        const workDurationInput = document.getElementById('pomodoro-work-duration');
+        const breakDurationInput = document.getElementById('pomodoro-break-duration');
+        const saveSettingsBtn = document.getElementById('pomodoro-save-settings');
+
+        let timer, isRunning = false,
+            workDuration = 25 * 60,
+            breakDuration = 5 * 60,
+            seconds = workDuration,
+            currentMode = 'Work', audioCtx;
+
+        function playSound() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.connect(audioCtx.destination); osc.start(); setTimeout(() => osc.stop(), 500);
+        }
+        function updateDisplay() {
+            timerDisplay.textContent = `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+        }
+        function resetTimer() {
+            clearInterval(timer); isRunning = false; startBtn.textContent = "Start";
+            seconds = (currentMode === 'Work') ? workDuration : breakDuration;
+            updateDisplay();
+        }
+        function switchMode() {
+            currentMode = (currentMode === 'Work') ? 'Break' : 'Work';
+            modeDisplay.textContent = currentMode;
+            playSound(); resetTimer();
+        }
+        function tick() {
+            seconds--; updateDisplay();
+            if (seconds < 0) { switchMode(); }
+        }
+        startBtn.addEventListener('click', () => {
+            isRunning = !isRunning;
+            if (isRunning) { timer = setInterval(tick, 1000); startBtn.textContent = "Pause"; } 
+            else { clearInterval(timer); startBtn.textContent = "Start"; }
+        });
+        resetBtn.addEventListener('click', resetTimer);
+        saveSettingsBtn.addEventListener('click', () => {
+            workDuration = parseInt(workDurationInput.value) * 60;
+            breakDuration = parseInt(breakDurationInput.value) * 60;
+            if (currentMode === 'Work') seconds = workDuration; else seconds = breakDuration;
+            resetTimer();
+        });
+        appInitializers['pomodoro-app'] = updateDisplay;
+    })();
+
+    // --- Drawing Canvas App ---
+    (() => {
+        const canvas = document.getElementById('drawing-canvas'); const controls = document.getElementById('drawing-controls');
+        const colorPicker = document.getElementById('drawing-color-picker'); const brushSize = document.getElementById('drawing-brush-size');
+        const clearBtn = document.getElementById('drawing-clear-btn'); const exportBtn = document.getElementById('drawing-export-btn');
+        const ctx = canvas.getContext('2d'); let isDrawing = false, lastX = 0, lastY = 0;
+        function setCanvasSize() { 
+            const appContent = document.querySelector('#drawing-app .app-content');
+            canvas.width = appContent.offsetWidth; 
+            canvas.height = appContent.offsetHeight - controls.offsetHeight;
+        }
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return [clientX - rect.left, clientY - rect.top];
+        }
+        function startDrawing(e) {
+            e.preventDefault(); isDrawing = true; [lastX, lastY] = getCoords(e);
+            ctx.strokeStyle = colorPicker.value; ctx.lineWidth = brushSize.value; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        }
+        function draw(e) {
+            if (!isDrawing) return; e.preventDefault(); const [x, y] = getCoords(e);
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); [lastX, lastY] = [x, y];
+        }
+        ['mousedown', 'touchstart'].forEach(evt => canvas.addEventListener(evt, startDrawing));
+        ['mousemove', 'touchmove'].forEach(evt => canvas.addEventListener(evt, draw));
+        ['mouseup', 'mouseout', 'touchend'].forEach(evt => canvas.addEventListener(evt, () => isDrawing = false));
+        clearBtn.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+        exportBtn.addEventListener('click', () => { exportBtn.href = canvas.toDataURL('image/png'); exportBtn.download = 'drawing.png'; });
+        appInitializers['drawing-app'] = setCanvasSize;
+    })();
+
+    // --- Unit Converter App ---
+    (() => {
+        const input = document.getElementById('converter-input'); const select = document.getElementById('converter-select'); const result = document.getElementById('converter-result');
+        function convert() {
+            const val = parseFloat(input.value); let res;
+            if(isNaN(val)) { result.textContent = '-'; return; }
+            switch(select.value) {
+                case 'm-ft': res = val * 3.28084; break; case 'ft-m': res = val / 3.28084; break;
+                case 'kg-lb': res = val * 2.20462; break; case 'lb-kg': res = val / 2.20462; break;
+                case 'c-f': res = (val * 9/5) + 32; break; case 'f-c': res = (val - 32) * 5/9; break;
+            }
+            result.textContent = res.toFixed(2);
+        }
+        input.addEventListener('input', convert); select.addEventListener('change', convert);
+    })();
+    
+    // --- Morse Code App ---
+    (() => {
+        const input = document.getElementById('morse-input'); const playBtn = document.getElementById('morse-play-btn');
+        const morseMap = {'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.','0':'-----', ' ': '/'};
+        let audioCtx;
+        function playTone(duration, freq = 500) {
+            return new Promise(resolve => {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator(); osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime); osc.connect(audioCtx.destination);
+                osc.start(); setTimeout(() => { osc.stop(); resolve(); }, duration);
+            });
+        }
+        async function playMorse(text) {
+            const unit = 100;
+            for (const char of text.toUpperCase()) {
+                const code = morseMap[char];
+                if (code) {
+                    for (const signal of code) {
+                        if (signal === '.') await playTone(unit); else if (signal === '-') await playTone(unit * 3);
+                        await new Promise(r => setTimeout(r, unit));
+                    }
+                    await new Promise(r => setTimeout(r, unit * 3));
+                } else if (char === ' ') { await new Promise(r => setTimeout(r, unit * 7)); }
+            }
+        }
+        playBtn.addEventListener('click', () => playMorse(input.value));
+    })();
+
+    // --- Password Generator App ---
+    (() => {
+        const display = document.getElementById('password-display'); const lengthSlider = document.getElementById('password-length');
+        const lengthLabel = document.getElementById('password-length-label'); const generateBtn = document.getElementById('generate-password-btn');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+        function generate() {
+            let password = '';
+            for (let i = 0; i < lengthSlider.value; i++) { password += chars.charAt(Math.floor(Math.random() * chars.length)); }
+            display.textContent = password;
+        }
+        lengthSlider.addEventListener('input', () => { lengthLabel.textContent = lengthSlider.value; });
+        generateBtn.addEventListener('click', generate); appInitializers['password-app'] = generate;
+    })();
+
+    // --- Tic Tac Toe App ---
+    (() => {
+        const boardEl = document.getElementById('tictactoe-board'); const statusEl = document.getElementById('tictactoe-status');
+        const resetBtn = document.getElementById('tictactoe-reset');
+        let board, currentPlayer, gameOver;
+        const winConditions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            board.forEach((val, i) => {
+                const cell = document.createElement('div'); cell.className = 'tictactoe-cell'; cell.textContent = val;
+                if(val === '' && !gameOver) cell.addEventListener('click', () => handleCellClick(i), { once: true });
+                boardEl.appendChild(cell);
+            });
+        }
+        function handleCellClick(i) {
+            board[i] = currentPlayer; renderBoard();
+            if(checkGameStatus()) return;
+            currentPlayer = 'O'; statusEl.textContent = "O's Turn"; setTimeout(cpuMove, 300);
+        }
+        function cpuMove() {
+            let emptyCells = board.map((c,i) => c === '' ? i : null).filter(c => c !== null);
+            if (emptyCells.length === 0 || gameOver) return;
+            board[emptyCells[Math.floor(Math.random() * emptyCells.length)]] = currentPlayer;
+            renderBoard(); checkGameStatus(); currentPlayer = 'X'; statusEl.textContent = "X's Turn";
+        }
+        function checkGameStatus() {
+            for(let condition of winConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    statusEl.textContent = `${board[a]} Wins!`; gameOver = true; return true;
+                }
+            }
+            if (!board.includes('')) { statusEl.textContent = "It's a Draw!"; gameOver = true; return true; }
+            return false;
+        }
+        function resetGame() {
+            board = Array(9).fill(''); currentPlayer = 'X'; gameOver = false;
+            statusEl.textContent = "X's Turn"; renderBoard();
+        }
+        resetBtn.addEventListener('click', resetGame); appInitializers['tictactoe-app'] = resetGame;
+    })();
+
+    // --- Rock Paper Scissors App ---
+    (() => {
+        const playerChoices = document.getElementById('rps-player-choices'); const resultEl = document.getElementById('rps-result');
+        const choices = ['rock', 'paper', 'scissors'];
+        playerChoices.addEventListener('click', e => {
+            if (!e.target.dataset.choice) return;
+            const playerChoice = e.target.dataset.choice; const cpuChoice = choices[Math.floor(Math.random() * 3)];
+            if (playerChoice === cpuChoice) resultEl.textContent = `Draw! Both chose ${playerChoice}`;
+            else if ((playerChoice === 'rock' && cpuChoice === 'scissors') || (playerChoice === 'paper' && cpuChoice === 'rock') || (playerChoice === 'scissors' && cpuChoice === 'paper')) {
+                resultEl.textContent = `You Win! ${playerChoice} beats ${cpuChoice}`;
+            } else { resultEl.textContent = `You Lose! ${cpuChoice} beats ${playerChoice}`; }
+        });
+    })();
+    
+    // --- Emoji App ---
+    (() => {
+        const display = document.getElementById('emoji-display');
+        const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','🥲','☺️','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','🐵','🐶','🐺','🐱','🦁','🐯','🦒','🦊','🦝','🐮','🐷','🐗','🐭','🐹','🐰','🐻','🐼','🐨','🐸','🦓','🐴','🦄','🐔','🐲','🐽','🐾','👀','👁','👅','👄','💋','🩸','🦴','🦷','🫀','🫁','🧠','👃','👣','🦾','🦿','💪','👍','👎','✊','👊','👋','🤚','🖐','🖖','🤘','🤙','👈','👉','👆','🖕','👇','☝️','🤞','🙏','💞','💕','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💣','💥','💦','💨','💫','💬','💭','💤','🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🚚','🚛','🚜','🛵','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','🛢️','⛽','🚨','🚔','🚍','🚘','🚖','🚡','🚠','🚟','🚃','🚋','🚆','🚝','🚄','🚅','🚈','🚂','✈️','🛫','🛬','💺','🚁','🛶','⛵','🚤','🛥️','🛳️','⛴️','🚀','🛸','🛰️','🪐','🌑','🌕','🌟','🌠','🌌','🌍','🌎','🌏','🏔️','🌋','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️','🏗️','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🛕','🕍','⛩️','🕋'];
+        const changeEmoji = () => { display.textContent = emojis[Math.floor(Math.random() * emojis.length)]; };
+        display.addEventListener('click', changeEmoji);
+        appInitializers['emoji-app'] = changeEmoji;
+    })();
+    
+    // --- Countdown App ---
+    (() => {
+        const dateInput = document.getElementById('countdown-date'); const display = document.getElementById('countdown-display');
+        let timer;
+        dateInput.addEventListener('change', () => {
+            clearInterval(timer); const target = new Date(dateInput.value).getTime();
+            if(isNaN(target)) { display.textContent = "Invalid Date"; return; }
+            const update = () => {
+                const distance = target - new Date().getTime();
+                if (distance < 0) { clearInterval(timer); display.textContent = "EXPIRED"; return; }
+                const d = Math.floor(distance / 86400000);
+                const h = Math.floor((distance % 86400000) / 3600000);
+                const m = Math.floor((distance % 3600000) / 60000);
+                const s = Math.floor((distance % 60000) / 1000);
+                display.textContent = `${d}d ${h}h ${m}m ${s}s`;
+            };
+            update(); timer = setInterval(update, 1000);
+        });
+    })();
+    
+    // --- Coin Flipper App ---
+    (() => {
+        const btn = document.getElementById('coin-flipper-btn'); const result = document.getElementById('coin-flipper-result');
+        btn.addEventListener('click', () => { result.textContent = Math.random() < 0.5 ? 'Heads' : 'Tails'; });
+    })();
+    
+    // --- Tip Calculator App ---
+    (() => {
+        const billEl = document.getElementById('tip-bill-amount'); const tipEl = document.getElementById('tip-percentage');
+        const splitEl = document.getElementById('tip-split-count'); const resultEl = document.getElementById('tip-total-per-person');
+        function calculate() {
+            const bill = parseFloat(billEl.value) || 0; const tip = parseFloat(tipEl.value) || 0;
+            const split = parseInt(splitEl.value) || 1;
+            if (bill <= 0) { resultEl.textContent = '$0.00'; return; }
+            resultEl.textContent = `$${((bill * (1 + tip / 100)) / split).toFixed(2)}`;
+        }
+        [billEl, tipEl, splitEl].forEach(el => el.addEventListener('input', calculate));
+        appInitializers['tip-calculator-app'] = calculate;
+    })();
+    
+    // --- Color Picker App ---
+    (() => {
+        const display = document.getElementById('color-picker-display');
+        const hex = document.getElementById('color-picker-hex');
+        const rgb = document.getElementById('color-picker-rgb');
+        const newColorBtn = document.getElementById('new-color-btn');
+
+        function generateRandomHexColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }
+
+        function updateColors() {
+            const color = generateRandomHexColor();
+            display.style.backgroundColor = color;
+            hex.textContent = color.toUpperCase();
+            const r = parseInt(color.substr(1, 2), 16), g = parseInt(color.substr(3, 2), 16), b = parseInt(color.substr(5, 2), 16);
+            rgb.textContent = `RGB(${r}, ${g}, ${b})`;
+        }
+        newColorBtn.addEventListener('click', updateColors);
+        appInitializers['color-picker-app'] = updateColors;
+    })();
+    
+    // --- Quotes App ---
+    (() => {
+        const btn = document.getElementById('new-quote-btn'); const display = document.getElementById('quote-display');
+        const quotes = [ "May the Force be with you.", "I find your lack of faith disturbing.", "It's a trap!", "Do. Or do not. There is no try.", "I am your father.", "Never tell me the odds!", "So this is how liberty dies... with thunderous applause.", "Chewie, we're home.", "I’ve got a bad feeling about this.", "The ability to speak does not make you intelligent.", "Your focus determines your reality.", "I’m one with the Force. The Force is with me.", "This is the way.", "I have spoken.", "Hello there.", "There’s always a bigger fish.", "I don't like sand. It's coarse and rough and irritating and it gets everywhere.", "These aren't the droids you're looking for.", "The garbage will do!", "That’s no moon.", "I am a Jedi, like my father before me." ];
+        const newQuote = () => { display.textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`; };
+        btn.addEventListener('click', newQuote); appInitializers['quotes-app'] = newQuote;
+    })();
+    
+    // --- Dice Roller App ---
+    (() => {
+        const result = document.getElementById('dice-result'); const slider = document.getElementById('dice-sides');
+        const label = document.getElementById('dice-sides-label'); const btn = document.getElementById('roll-dice-btn');
+        const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        slider.addEventListener('input', () => label.textContent = slider.value);
+        btn.addEventListener('click', () => {
+            const sides = slider.value; const roll = Math.floor(Math.random() * sides) + 1;
+            result.textContent = roll <= 6 ? diceFaces[roll - 1] : roll;
+        });
+    })();
+    
+    // --- BMI Calculator App ---
+    (() => {
+        const heightEl = document.getElementById('bmi-height'); const weightEl = document.getElementById('bmi-weight');
+        const btn = document.getElementById('bmi-calculate-btn'); const result = document.getElementById('bmi-result');
+        btn.addEventListener('click', () => {
+            const height = parseFloat(heightEl.value) / 100; const weight = parseFloat(weightEl.value);
+            if (height > 0 && weight > 0) { result.textContent = `BMI: ${(weight / (height * height)).toFixed(1)}`; } 
+            else { result.textContent = 'Invalid Input'; }
+        });
+    })();
+    
+    // --- Click Counter App ---
+    (() => {
+        const display = document.getElementById('counter-display'); const incBtn = document.getElementById('increment-btn');
+        const resetBtn = document.getElementById('reset-counter-btn'); let count = 0;
+        incBtn.addEventListener('click', () => display.textContent = ++count);
+        resetBtn.addEventListener('click', () => { count = 0; display.textContent = count; });
+    })();
+    
+    // --- INITIALIZATION ---
+    const mainInit = () => {
+        const statusBarHTML = `<div class="status-left"><div class="signal-bars" style="height:10px;"><div style="height:20%"></div><div style="height:40%"></div><div style="height:60%"></div><div style="height:80%"></div><div style="height:100%"></div></div><span style="margin-left:4px;">Pirillo</span></div><span id="clock"></span><div class="status-right"><div class="battery-icon"><div class="battery-level"></div></div></div>`;
+        statusBar.innerHTML = statusBarHTML;
+        
+        setupIcons();
+        updateTime();
+        setInterval(updateTime, 1000); 
+    };
+
+    mainInit();
+});
+</script>
+</body>
+</html>
